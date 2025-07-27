@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:7.0
+    container_name: products-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: products_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - shared-net
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/products_db --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Node.js API Service with Live Reload
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development tools
+    container_name: products-api-live
+    restart: unless-stopped
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=development
+      - PORT=3010
+      - MONGODB_URI=mongodb://mongodb:27017/products_db
+    volumes:
+      # Mount entire source directory for live changes
+      - ./src:/app/src
+      # Mount package.json for dependency changes
+      - ./package.json:/app/package.json:ro
+      # Mount tsconfig.json for TypeScript config changes
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      # Exclude node_modules to avoid conflicts
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - shared-net
+    # Use nodemon for auto-restart on file changes
+    command: ["npx", "nodemon", "--watch", "src", "--ext", "ts,js,json", "--exec", "npx ts-node src/index.ts"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3010/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Data Processing Service with Live JSON Reload
+  data-processor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: products-data-processor
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/products_db
+    volumes:
+      # Mount source directory for live changes
+      - ./src:/app/src
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - shared-net
+    # Keep container running for manual data processing
+    command: ["tail", "-f", "/dev/null"]
+    restart: "no"
+
+# Named volumes for data persistence
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+
+# Custom network for service communication
+networks:
+  shared-net:
+    name: shared-net
+    driver: bridge
+

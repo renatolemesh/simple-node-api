@@ -11,8 +11,8 @@ make up
 docker-compose up -d
 
 # Access the API
-curl http://localhost:3000/health
-curl http://localhost:3000/api/products
+curl http://localhost:3010/health
+curl http://localhost:3010/api/products
 ```
 
 **For live code changes (development):**
@@ -120,7 +120,7 @@ make dev-up        # Start development environment
 3. **Environment Setup:**
    Create a `.env` file with:
    ```
-   PORT=3000
+   PORT=3010
    MONGODB_URI=mongodb://localhost:27017/products_db
    NODE_ENV=development
    ```
@@ -247,22 +247,22 @@ make dev-up        # Start development environment
 
 ### Get All Products
 ```bash
-curl http://localhost:3000/api/products
+curl http://localhost:30/10api/products
 ```
 
 ### Search Products
 ```bash
-curl "http://localhost:3000/api/products/search?q=POKE"
+curl "http://localhost:3010/api/products/search?q=POKE"
 ```
 
 ### Get Product by ID
 ```bash
-curl http://localhost:3000/api/products/452
+curl http://localhost:3010/api/products/452
 ```
 
 ### Create New Product
 ```bash
-curl -X POST http://localhost:3000/api/products \
+curl -X POST http://localhost:3010/api/products \
   -H "Content-Type: application/json" \
   -d '{
     "id": 999,

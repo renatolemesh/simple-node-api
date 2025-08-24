@@ -11,8 +11,9 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/db
-      - mongodb_config:/data/configdb
+      - ./data/mongodb:/data/db
+      - ./data/mongodb_config:/data/configdb
+
     networks:
       - shared-net
     healthcheck:
@@ -59,34 +60,12 @@ services:
       retries: 3
       start_period: 40s
 
-  # Data Processing Service with Live JSON Reload
-  data-processor:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: builder
-    container_name: products-data-processor
-    environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/products_db
-    volumes:
-      # Mount source directory for live changes
-      - ./src:/app/src
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - shared-net
-    # Keep container running for manual data processing
-    command: ["tail", "-f", "/dev/null"]
-    restart: "no"
-
 # Named volumes for data persistence
 volumes:
   mongodb_data:
-    driver: local
+    name: lifepoke-api_mongodb_data
   mongodb_config:
-    driver: local
+    name: lifepoke-api_mongodb_config
 
 # Custom network for service communication
 networks:

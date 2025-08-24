@@ -1,0 +1,57 @@
+{
+    "order": {
+        "items": [
+            {
+                "id": 1,
+                "quantity": 1,
+                "unitprice": 60.99,
+                "variables": [
+                    {
+                        "id": 86,
+                        "components": [
+                            {
+                                "id": 308,
+                                "quantity": 1,
+                                "value": 14.99
+                            }
+                        ]
+                    }
+                ],
+                "itemvalue": 75.98
+            },
+            {
+                "id": 452,
+                "quantity": 1,
+                "unitprice": 89.99,
+                "variables": [
+                    {
+                        "id": 97,
+                        "components": [
+                            {
+                                "id": 10,
+                                "quantity": 1,
+                                "value": 0
+                            },
+                            {
+                                "id": 12,
+                                "quantity": 1,
+                                "value": 0
+                            }
+                        ]
+                    }
+                ],
+                "itemvalue": 89.99
+            }
+        ]
+    },
+    "total": 155.97,
+    "address": {
+        "name": "John Doe",
+        "address": "123 Main Street",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345",
+        "phone": "554699999999",
+        "paymenttype": "debit"
+    }
+}

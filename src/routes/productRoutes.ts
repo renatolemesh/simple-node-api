@@ -35,7 +35,7 @@ router.delete('/:id', deleteProduct);
 router.get('/tests/1', tests);
 
 // DELETE /api/products/delete/all - Delete all products
-router.delete('/delete/all', deleteAllProducts);
+//router.delete('/delete/all', deleteAllProducts);
 
 router.get('/short-data/all', getProductsShortData);
 

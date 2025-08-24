@@ -4,7 +4,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 interface IComponent {
   id: number;
   name: string;
-  unitPrice: number;
+  //unitPrice: number;
   unit: string;
   enabled: string;
   barcode?: string;
@@ -51,7 +51,7 @@ export interface IProduct extends Document {
 const ComponentSchema = new Schema<IComponent>({
   id: { type: Number, required: true },
   name: { type: String, required: true },
-  unitPrice: { type: Number, required: true },
+  //unitPrice: { type: Number, required: true },
   unit: { type: String, required: true },
   enabled: { type: String, required: true },
   barcode: { type: String },

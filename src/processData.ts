@@ -6,7 +6,7 @@ import Product from './models/Product';
 interface RawComponent {
   id: number;
   name: string;
-  unitPrice: number;
+  //unitPrice: number;
   unit: string;
   enabled: string;
   barcode?: string;
@@ -114,7 +114,7 @@ const processData = async () => {
               components: variable.components.map(comp => ({
                 id: comp.component.id,
                 name: comp.component.name,
-                unitPrice: comp.component.unitPrice,
+                //unitPrice: comp.component.unitPrice,
                 unit: comp.component.unit,
                 enabled: comp.component.enabled,
                 barcode: comp.component.barcode || '',

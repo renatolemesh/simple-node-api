@@ -10,7 +10,7 @@ services:
       - "27017:27017"
     volumes:
       - ./docker_data/mongodb:/data/db
-      - ./docker_data/mongodb_config:/data/configdb
+      #- ./docker_data/mongodb_config:/data/configdb
     networks:
       - shared-net
     healthcheck:
@@ -38,7 +38,6 @@ services:
       - ./src:/app/src
       - ./package.json:/app/package.json:ro
       - ./tsconfig.json:/app/tsconfig.json:ro
-      - /app/node_modules
     depends_on:
       mongodb:
         condition: service_healthy

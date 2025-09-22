@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/database';
 import productRoutes from './routes/productRoutes';
 import orderRoutes from './routes/orderRoutes';
+import externalProductRoutes from './routes/externalProductRoutes';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/external/products', externalProductRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

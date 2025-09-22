@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import Order from '../models/Order';
+import {validateOrderForExternal, mapOrderToExternal} from '../utils/mapOrderToExternal';
+import ExternalOrder from '../models/ExternalOrder';
 
 // Create order (receive order_products in body)
 export const createOrder = async (req: Request, res: Response) => {
@@ -104,8 +106,8 @@ export const getOrderByCustomerNumber = async (req: Request, res: Response) => {
 // update status of an existing order
 export const updateOrderStatus = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params; // order id
-    const { status } = req.body; // new order status
+    const { id } = req.params;
+    const { status } = req.body;
 
     const order = await Order.findById(id);
     if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
@@ -113,12 +115,26 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     order.status = status;
     await order.save();
 
-    return res.json({ success: true, data: order });
+    let externalOrder = null;
+
+    if (status === 'completed') {
+      try {
+        validateOrderForExternal(order);
+        const mapped = mapOrderToExternal(order);
+        externalOrder = new ExternalOrder(mapped);
+        await externalOrder.save();
+      } catch (err: any) {
+        return res.status(400).json({ success: false, error: `Validation failed: ${err.message}` });
+      }
+    }
+
+    return res.json({ success: true, data: { order, externalOrder } });
   } catch (error) {
     console.error('updateOrderStatus error:', error);
     return res.status(500).json({ success: false, error: 'Failed to update order status' });
   }
 };
+
 
 // Remove product from an existing order
 export const removeProductFromOrder = async (req: Request, res: Response) => {
@@ -134,7 +150,7 @@ export const removeProductFromOrder = async (req: Request, res: Response) => {
 
     // filtra o produto removendo pelo campo id
     order.order_products = order.order_products.filter(
-      (p) => p.id.toString() !== productId.toString()
+      (p: { id: { toString: () => string; }; }) => p.id.toString() !== productId.toString()
     );
 
     if (order.order_products.length === initialLength) {
@@ -149,4 +165,52 @@ export const removeProductFromOrder = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, error: 'Failed to remove product' });
   }
 };
+
+export const setOrderAddress = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // order id
+    const address = req.body;  // expects address object
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found' });
+    }
+
+    order.address = {
+      street: address.street,
+      number: address.number,
+      district: address.district,
+      city: address.city,
+      state: address.state,
+      zip_code: address.zip_code
+    };
+
+    await order.save();
+
+    return res.json({ success: true, data: order });
+  } catch (error) {
+    console.error('setOrderAddress error:', error);
+    return res.status(500).json({ success: false, error: 'Failed to set order address' });
+  }
+};
+
+// set order payment method
+export const setOrderPaymentMethod = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // order id
+    const { paymentMethod } = req.body; // new order status
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
+
+    order.payment_method = paymentMethod;
+    await order.save();
+
+    return res.json({ success: true, data: order });
+  } catch (error) {
+    console.error('set order payment method error:', error);
+    return res.status(500).json({ success: false, error: 'Failed to set order payment method' });
+  }
+};
+
 

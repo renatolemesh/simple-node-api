@@ -7,7 +7,9 @@ import {
   addProductToOrder,
   getOrderByCustomerNumber,
   updateOrderStatus,
-  removeProductFromOrder
+  removeProductFromOrder,
+  setOrderAddress,
+  setOrderPaymentMethod
 } from '../controllers/orderController';
 
 const router = Router();
@@ -54,5 +56,17 @@ router.post('/:id/products', addProductToOrder);
  * DELETE /orders/:id/products/:productId
  */
 router.delete('/:id/products/:productId', removeProductFromOrder); // remove product
+
+/**
+ * Add a product to an existing order
+ * POST /orders/:id/products
+ */
+router.post('/:id/address', setOrderAddress);
+
+/**
+ * set order payment method
+ * Posts /orders/:id/paymentMethod
+ */
+router.post('/:id/paymentMethod', setOrderPaymentMethod);
 
 export default router;

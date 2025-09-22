@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 interface IOrderProductComponent {
   id: number;
@@ -16,12 +16,14 @@ interface IOrderProduct {
   id: number; // product id original
   name: string;
   unitPrice: number;
+  type: number;
   variables: IOrderProductVariable[];
   finalPrice: number; // calculate (unitPrice + sum of values)
   quantity?: number; // optional, defaults 1
 }
 
 export interface IOrder extends Document {
+  _id: Types.ObjectId;
   orderNumber?: string;
   order_products: IOrderProduct[];
   total: number;
@@ -36,7 +38,8 @@ export interface IOrder extends Document {
     city: string;
     state: string;
     zip_code: string;
-  }
+  },
+  payment_method?: 'credit' | 'debit' | 'cash' | 'pix'; 
 }
 
 const ComponentSchema = new Schema<IOrderProductComponent>({
@@ -55,20 +58,38 @@ const OrderProductSchema = new Schema<IOrderProduct>({
   id: { type: Number, required: true },
   name: { type: String, required: true },
   unitPrice: { type: Number, required: true },
+  type: { type: Number, required: true },
   variables: { type: [VariableSchema], default: [] },
   finalPrice: { type: Number, required: true },
   quantity: { type: Number, default: 1 }
 }, { _id: false });
 
+const AddressSchema = new Schema({
+  street: { type: String, required: true },
+  number: { type: String, required: true },
+  district: { type: String, required: true },
+  city: { type: String, required: true },
+  state: { type: String, required: true },
+  zip_code: { type: String, required: true }
+}, { _id: false });
+
 const OrderSchema = new Schema<IOrder>({
-  orderNumber: { type: Number, index: true, unique: true },
+  orderNumber: { type: String, index: true, unique: true },
   order_products: { type: [OrderProductSchema], default: [] },
   total: { type: Number, default: 0 },
   customer_number: { type: String }, 
-  status: { type: String, default: 'pending' }
+  status: { type: String, default: 'pending' },
+  address: { type: AddressSchema, default: null },
+  payment_method: { 
+    type: String, 
+    enum: ['credit', 'debit', 'cash', 'pix'], // restrict allowed values
+    default: 'cash'                           
+  }
 }, {
   timestamps: true
 });
+
+
 
 /**
  * Hook that recalculates finalPrice of each order_product and total of the order before saving.

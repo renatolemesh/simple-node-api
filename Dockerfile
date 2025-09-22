@@ -1,9 +1,6 @@
-# Multi-stage Dockerfile for Node.js TypeScript API
-
 # Stage 1: Build stage
 FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
 # Copy package files
@@ -21,7 +18,6 @@ RUN npm run build
 # Stage 2: Production stage
 FROM node:20-alpine AS production
 
-# Create app directory
 WORKDIR /app
 
 # Create non-root user for security
@@ -43,13 +39,15 @@ COPY .env.docker ./.env
 # Copy sample data file
 COPY src/sample_products.json ./src/
 
+# Install runtime dependencies (like axios)
+RUN npm install --only=production
+
 # Change ownership to nodejs user
 RUN chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs
 
-# Expose port
 EXPOSE 3001
 
 # Health check
@@ -58,4 +56,3 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 CMD ["node", "dist/index.js"]
-
